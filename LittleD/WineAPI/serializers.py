@@ -12,8 +12,11 @@ class MenuItemSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), 
         write_only=True,
     )
-    # category = serializers.StringRelatedField()
+    category = serializers.StringRelatedField()
     class Meta:
         model = MenuItem
-        fields = ['pk', 'title', 'price', 'category','category_id', 'featured']
-       
+        
+        fields = ['pk', 'title',  'year', 'price', 'category', 'varietal','origin', 'point', 'description',
+                  'category_id']
+        
+        
