@@ -20,14 +20,14 @@ class MenuItems(generics.ListCreateAPIView):
     # permission_classes = [CategoriesMenuItemsPermission]
 
     # pagination_class = CustomPagination
-    ordering_fields=['price']
-    search_fields = ['title','category__title']
+    ordering_fields=['price', 'point', 'year']
+    search_fields = ['title','category__title', 'varietal', 'origin']
 
     def get_queryset(self):
         queryset = MenuItem.objects.select_related('category').all()
         category_name = self.request.query_params.get('category')
         if category_name:
-            queryset = queryset.filter(category__title=category_name)
+            queryset = queryset.filter(category__slug=category_name)
         return queryset
 
     
