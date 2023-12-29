@@ -1,23 +1,25 @@
 from django.shortcuts import render
 from .models import MenuItem, Category
 from .serializers import CategorySerializer, MenuItemSerializer
+from .permissions import CategoriesMenuItemsPermission, CategoryMenuItemPermission
 from rest_framework import generics
+
 # Create your views here.
 class Categories(generics.ListCreateAPIView):   
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = [CategoriesMenuItemsPermission]
+    permission_classes = [CategoriesMenuItemsPermission]
 
 class SingleCategory(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = [CategoryMenuItemPermission]
+    permission_classes = [CategoryMenuItemPermission]
 
 
 class MenuItems(generics.ListCreateAPIView):   
     # throttle_classes = [AnonRateThrottle, UserRateThrottle]
     serializer_class = MenuItemSerializer
-    # permission_classes = [CategoriesMenuItemsPermission]
+    permission_classes = [CategoriesMenuItemsPermission]
 
     # pagination_class = CustomPagination
     ordering_fields=['price', 'point', 'year']
@@ -34,5 +36,5 @@ class MenuItems(generics.ListCreateAPIView):
 class SingleMenuItem(generics.RetrieveUpdateDestroyAPIView):   
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
-    # permission_classes = [CategoryMenuItemPermission]
+    permission_classes = [CategoryMenuItemPermission]
 
