@@ -62,7 +62,7 @@ class CartSerializer(serializers.ModelSerializer):
         return '{}'.format(obj.quantity * obj.menuitem.price)
         
     
-    def create(self, validated_data):
+    def create(self, validated_data): 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
         user = self.context['request'].user
         menuitem = validated_data.pop('MenuItem')
@@ -72,7 +72,6 @@ class CartSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("There is not enough in stock".format(menuitem.inventory))
         cartitem_obj.quantity += 1
         cartitem_obj.save()
-        
         return cartitem_obj
         
     def update(self, instance, validated_data):
@@ -99,9 +98,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = [ 
-            'pk',
-            'menuitem_id', 
-            'menuitem', 
+            'pk', 'menuitem_id', 'menuitem', 
             'quantity', 'unit_price', 'line_total' ]
         
     
