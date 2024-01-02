@@ -20,20 +20,51 @@ class MenuItem(models.Model):
             )
       
     title = models.CharField(max_length=255, db_index=True)
-    price = models.DecimalField(max_digits=6, decimal_places=2,
-        validators=[MinValueValidator(0)]
+    price = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0, validators=[MinValueValidator(0)]
     )
     category = models.ForeignKey(Category, on_delete=models.PROTECT, null=True, blank=True)
-    origin = models.CharField(max_length=255)
+    origin = models.CharField(max_length=255, blank=True, null=True)
     point = models.PositiveSmallIntegerField(
-        blank=True, null=True,
-        validators=[MaxValueValidator(100)]
+        blank=True, null=True, validators=[MaxValueValidator(100)]
     )
-    varietal = models.CharField(max_length=255)
-    description = models.TextField()
+    varietal = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     year = models.PositiveSmallIntegerField(
         validators=[year_validator], 
+    )
+    inventory = models.PositiveSmallIntegerField(
+        validators=[MaxValueValidator(1000)], default=0
     )
 
     def __str__(self):
         return str(self.year)+ " "+self.title
+    
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE, db_index=True)
+    quantity = models.PositiveSmallIntegerField(default=0)
+   
+class OrderStatus(models.Model):
+    slug = models.SlugField()
+    status = models.CharField(max_length=255, db_index=True)
+
+    def __str__(self)-> str:
+        return self.status
+    
+class Order(models.Model):
+    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
+    status = models.ForeignKey(OrderStatus, on_delete=models.PROTECT, null=True, blank=True, default=1)
+    total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
+    date = models.DateField(db_index=True)
+ 
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='orderitems', on_delete=models.CASCADE)
+    menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField(default=0)
+    unit_price = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
+    line_total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
+  
+    class Meta:
+        unique_together = ('order', 'menuitem')
+
