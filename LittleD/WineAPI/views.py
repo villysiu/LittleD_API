@@ -69,8 +69,13 @@ def orders(request):
         queryset = Order.objects.all()
         if request.user.groups.filter(name='Manager').exists():
             status = request.query_params.get('status')
+            
+            user_id = request.query_params.get('user_id')
+            print(user_id)
             if status:
                 queryset = queryset.filter(status__slug=status)
+            if user_id:
+                queryset = queryset.filter(user__pk=user_id)
         
         else:
             queryset = queryset.filter(user=request.user)
