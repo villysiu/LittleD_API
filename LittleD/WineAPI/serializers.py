@@ -60,36 +60,31 @@ class CartSerializer(serializers.ModelSerializer):
 
     def get_linetotal(self, obj):
         return '{}'.format(obj.quantity * obj.menuitem.price)
-    
-    def validate_quantity(self, value):
-    #     """
-    #     Check if inventoty can fulfill the request
-    #     """
         
-        menuitem_id = self.Meta.model.objects.all()[0].menuitem_id
-
-        print(menuitem_id)
-        
-        inventory = MenuItem.objects.filter(pk=menuitem_id)[0].inventory
-        print(inventory)
-        if value > inventory:
-            raise serializers.ValidationError("There is only {} left in stock ".format(inventory))
-        return value
     
     def create(self, validated_data):
         # Should always return a user since only authenticated user can access ( isAuthenticated)
         user = self.context['request'].user
         menuitem = validated_data.pop('MenuItem')
-        
+
         cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user)
+        if menuitem.inventory <= cartitem_obj.quantity:
+            raise serializers.ValidationError("There is not enough in stock".format(menuitem.inventory))
         cartitem_obj.quantity += 1
         cartitem_obj.save()
         
         return cartitem_obj
         
     def update(self, instance, validated_data):
-        instance.quantity = validated_data.get('quantity', instance.quantity)        
+        menuitem = instance.menuitem
+
+        if menuitem.inventory  < validated_data['quantity']:
+            raise serializers.ValidationError("There is {} in stock".format(menuitem.inventory))
+        
+        instance.quantity = validated_data.get('quantity', instance.quantity)  
         instance.save()
+        
+        
         return instance
     
 class OrderItemSerializer(serializers.ModelSerializer):   
@@ -109,21 +104,22 @@ class OrderItemSerializer(serializers.ModelSerializer):
             'menuitem', 
             'quantity', 'unit_price', 'line_total' ]
         
-    def validate_quantity(self, value):
-    #     """
-    #     Check if inventoty can fulfill the request
-    #     """
-        inventory = self.Meta.model.objects.all()[0].menuitem.inventory
-        # print(inventory)
-
-        if value > inventory:
-            raise serializers.ValidationError("There is only {} left in stock ".format(inventory))
-        return value
     
-
     def get_line_total(self, obj):
         return obj.quantity * obj.unit_price
+
+    def update(self, instance, validated_data):
+        menuitem = instance.menuitem
+        if menuitem.inventory + instance.quantity < validated_data['quantity']:
+            raise serializers.ValidationError("oh no There is {} in stock".format(menuitem.inventory))
         
+        menuitem.inventory = menuitem.inventory+instance.quantity-validated_data['quantity']
+        menuitem.save()
+
+        instance.quantity = validated_data.get('quantity', instance.quantity)
+        instance.save()
+       
+        return instance
 
 class OrderSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(
@@ -146,7 +142,6 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['pk', 'user', 'orderitems', 'status', 'total','status_id']
 
     def get_total(self, obj):
-
         value = obj.orderitems.aggregate(total=Sum(
             ExpressionWrapper(
                 F('quantity') * F('unit_price'),
@@ -165,12 +160,14 @@ class OrderSerializer(serializers.ModelSerializer):
         
         for orderitem in orderitems:
             menuitem = orderitem.pop('MenuItem')
-            OrderItem.objects.create(order = order_obj, menuitem=menuitem, unit_price=menuitem.price, **orderitem )
-            # update inventory 
-            menuitem.inventory = menuitem.inventory - orderitem['quantity']
-            menuitem.save()
-            
 
+            if orderitem['quantity'] > menuitem.inventory:
+                raise serializers.ValidationError("oh no There is {} in stock".format(menuitem.inventory))
+            # update inventory 
+            menuitem.inventory -= orderitem['quantity']
+            menuitem.save()
+            OrderItem.objects.create(order = order_obj, menuitem=menuitem, unit_price=menuitem.price, **orderitem )
+            
         order_obj.save()
         return order_obj
 
