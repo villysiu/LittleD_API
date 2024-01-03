@@ -17,15 +17,18 @@ class Reservations(generics.ListCreateAPIView):
         current_user = self.request.user
         upcoming = self.request.query_params.get('upcoming')
         user_id = self.request.query_params.get('user_id')
+        res_date = self.request.query_params.get('date')
+        
         if current_user.groups.filter(name='Manager').exists():
             if user_id:
                 queryset = queryset.filter(user__pk=user_id)
-  
         else:
             queryset = queryset.filter(user__pk=current_user.id)
 
         if upcoming:
             queryset = queryset.filter(reservation_date__gte=datetime.today())
+        if res_date:
+            queryset = queryset.filter(reservation_date=res_date)
         return queryset
 
 class SingleReservation(generics.RetrieveUpdateDestroyAPIView):   
