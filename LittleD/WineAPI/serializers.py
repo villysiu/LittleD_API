@@ -125,19 +125,20 @@ class OrderSerializer(serializers.ModelSerializer):
     )
     orderitems = OrderItemSerializer(many=True)
    
-    status = serializers.StringRelatedField(read_only=True)
-    status_id = serializers.PrimaryKeyRelatedField(
-        source='OrderStatus',
-        queryset=OrderStatus.objects.all(), 
-        write_only=True,
-        required=False,
+    # status = serializers.StringRelatedField(read_only=True)
+    # order_status_id = serializers.PrimaryKeyRelatedField(
+    #     source='OrderStatus',
+    #     queryset=OrderStatus.objects.all(), 
+    #     write_only=True,
+    #     required=False,
         
-    )
+    # )
+    # order_status = serializers.CharField()
     total = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = Order
-        fields = ['pk', 'user', 'orderitems', 'status', 'total','status_id']
+        fields = ['pk', 'user', 'orderitems', 'order_status', 'total']
 
     def get_total(self, obj):
         value = obj.orderitems.aggregate(total=Sum(
@@ -171,7 +172,8 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
     def update(self, instance, validated_data):
-        instance.status = validated_data.get('OrderStatus', instance.status)
+        print(validated_data)
+        instance.order_status = validated_data.get('order_status', instance.order_status)
         instance.save()
         return instance
 

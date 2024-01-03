@@ -73,7 +73,7 @@ def orders(request):
             user_id = request.query_params.get('user_id')
             print(user_id)
             if status:
-                queryset = queryset.filter(status__slug=status)
+                queryset = queryset.filter(order_status=status)
             if user_id:
                 queryset = queryset.filter(user__pk=user_id)
         

@@ -53,8 +53,14 @@ class OrderStatus(models.Model):
         return self.status
     
 class Order(models.Model):
+    STATUS_CHOICES = {
+        "R":"Received",
+        "P":"Processing",
+        "S": "Shipped"
+    }
     user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
-    status = models.ForeignKey(OrderStatus, on_delete=models.PROTECT, null=True, blank=True, default=1)
+    order_status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="R")
+    
     total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
     date = models.DateField(db_index=True)
  
