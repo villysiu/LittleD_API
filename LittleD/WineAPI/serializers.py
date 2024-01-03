@@ -130,7 +130,8 @@ class OrderSerializer(serializers.ModelSerializer):
         source='OrderStatus',
         queryset=OrderStatus.objects.all(), 
         write_only=True,
-        required=False
+        required=False,
+        
     )
     total = serializers.SerializerMethodField(read_only=True)
     
