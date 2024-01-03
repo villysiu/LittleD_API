@@ -14,6 +14,12 @@ class Reservation(models.Model):
             raise ValidationError(
                 "Ensure the value is greater than or equal to {}".format(datetime.datetime.now().date())
             )
+
+        if res_date > datetime.datetime.now().date()+datetime.timedelta(days=30):
+            raise ValidationError(
+                "We schedule only 30 days in advance. Try an earlier date."
+            )
+        
         
     def reservation_time_validator(res_time):
         if not (11 <= res_time.hour <= 20):
@@ -25,7 +31,7 @@ class Reservation(models.Model):
         next = datetime.datetime.now().hour+1
         return '{}:00:00'.format(next)
   
-    user = models.ForeignKey(User, on_delete=models.CASCADE, db_index=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     
     reservation_date = models.DateField(default = timezone.now, validators=[reservation_date_validator])
     reservation_time = models.TimeField(default = next_hour, validators=[reservation_time_validator])
