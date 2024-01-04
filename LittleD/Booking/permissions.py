@@ -1,5 +1,5 @@
 from rest_framework import permissions
-
+import datetime
 class ReservationPermission(permissions.BasePermission):
     """
     Custom permission to only allow owners of an object to edit it.
@@ -15,16 +15,22 @@ class ReservationPermission(permissions.BasePermission):
         
 class SingleReservationPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # user can see his own reservatopn and edit
-        #  manager can see all res and edit
-        if request.user.is_authenticated:
-            if request.user.groups.filter(name='Manager').exists():
-                return True
-            else:
-                return request.user.id == obj.user.id
+        # user can see all his reservatopn
+        # user can only update or destroy future reservations
+        # manager can see reservations of all user 
+        # manager can update and destroy past and upcoming reservations
+        print("in single res permission")
+        if request.user.groups.filter(name='Manager').exists():
+            return True
         else:
-            return False
-
+            if request.method in ['PATCH', 'DESTROY']:
+                
+                res_dt = datetime.datetime.combine(obj.reservation_date, obj.reservation_time)
+                if res_dt < datetime.datetime.now()-datetime.timedelta(hours=8):
+                    return False
+                
+            return request.user.id == obj.user.id
+                
         
             
     

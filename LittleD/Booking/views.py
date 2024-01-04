@@ -33,6 +33,6 @@ class Reservations(generics.ListCreateAPIView):
 class SingleReservation(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
-    permission_classes = [SingleReservationPermission]
+    permission_classes = [IsAuthenticated, SingleReservationPermission]
 
 
