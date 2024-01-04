@@ -7,8 +7,6 @@ from .serializers import ReservationSerializer
 import datetime
 from .permissions import SingleReservationPermission, ReservationPermission
 # Create your views here.
-
-
     
 class Reservations(generics.ListCreateAPIView):   
     # throttle_classes = [AnonRateThrottle, UserRateThrottle]

@@ -69,6 +69,9 @@ class CartSerializer(serializers.ModelSerializer):
 
         cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user)
         if menuitem.inventory <= cartitem_obj.quantity:
+
+            cartitem_obj.delete()
+   
             raise serializers.ValidationError("Out of stock".format(menuitem.inventory))
         cartitem_obj.quantity += 1
         cartitem_obj.save()

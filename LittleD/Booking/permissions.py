@@ -15,11 +15,13 @@ class ReservationPermission(permissions.BasePermission):
         
 class SingleReservationPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # user can see all his reservatopn
-        # user can only update or destroy future reservations
-        # manager can see reservations of all user 
-        # manager can update and destroy past and upcoming reservations
-        print("in single res permission")
+        """
+        user can see all his reservatopn
+        user can only update or destroy future reservations
+        manager can see reservations of all user 
+        manager can update and destroy past and upcoming reservations
+        """
+        
         if request.user.groups.filter(name='Manager').exists():
             return True
         else:

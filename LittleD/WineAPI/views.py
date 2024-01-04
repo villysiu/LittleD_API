@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from .models import MenuItem, Category, Cart, Order, OrderItem
 from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, OrderItemSerializer
-from .permissions import CategoriesMenuItemsPermission, CategoryMenuItemPermission, CartItemPermission, OrdersPermission, SingleOrderPermission, OrderItemPermission
+from .permissions import CategoriesMenuItemsPermission, CategoryMenuItemPermission, CartItemsPermission, CartItemsPermission, OrdersPermission, SingleOrderPermission, SingleOrderItemPermission
 # , OrdersPermission
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -41,10 +41,13 @@ class SingleMenuItem(generics.RetrieveUpdateDestroyAPIView):
 class CartItmes(generics.ListCreateAPIView, generics.DestroyAPIView):
 
     serializer_class = CartSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CartItemsPermission]
+    filterset_fields = ['user_id']
     def get_queryset(self):
+        queryset=Cart.objects.all()
         current_user = self.request.user
-        queryset = Cart.objects.filter(user=current_user)
+        if not current_user.groups.filter(name='Manager').exists():
+            queryset = queryset.filter(user=current_user)
         return queryset
     
     def destroy(self, request, *args, **kwargs):
@@ -57,7 +60,7 @@ class CartItmes(generics.ListCreateAPIView, generics.DestroyAPIView):
 
 class SingleCartItem(generics.RetrieveUpdateDestroyAPIView):   
     serializer_class = CartSerializer
-    permission_classes = [CartItemPermission]
+    permission_classes = [IsAuthenticated, SingleOrderItemPermission]
     queryset = Cart.objects.all()
         
 class Orders(generics.ListCreateAPIView):
@@ -101,12 +104,12 @@ class Orders(generics.ListCreateAPIView):
 class SingleOrder(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-    permission_classes = [SingleOrderPermission]
+    permission_classes = [IsAuthenticated, SingleOrderPermission]
 
 class SingleOrderItem(generics.RetrieveUpdateDestroyAPIView):   
     queryset = OrderItem.objects.all()
     serializer_class = OrderItemSerializer
-    permission_classes = [OrderItemPermission]
+    permission_classes = [IsAuthenticated, SingleOrderItemPermission]
 
     
 
