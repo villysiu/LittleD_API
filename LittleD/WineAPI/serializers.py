@@ -13,7 +13,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), 
         write_only=True,
     )
-    category = serializers.StringRelatedField()
+
     class Meta:
         model = MenuItem
         fields = ['pk', 'title',  'year', 'price', 'category', 'varietal','origin', 'point', 'description',
@@ -69,7 +69,7 @@ class CartSerializer(serializers.ModelSerializer):
 
         cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user)
         if menuitem.inventory <= cartitem_obj.quantity:
-            raise serializers.ValidationError("There is not enough in stock".format(menuitem.inventory))
+            raise serializers.ValidationError("Out of stock".format(menuitem.inventory))
         cartitem_obj.quantity += 1
         cartitem_obj.save()
         return cartitem_obj
@@ -78,7 +78,7 @@ class CartSerializer(serializers.ModelSerializer):
         menuitem = instance.menuitem
 
         if menuitem.inventory  < validated_data['quantity']:
-            raise serializers.ValidationError("There is {} in stock".format(menuitem.inventory))
+            raise serializers.ValidationError("There is only {} in stock".format(menuitem.inventory))
         
         instance.quantity = validated_data.get('quantity', instance.quantity)  
         instance.save()
@@ -128,7 +128,7 @@ class OrderSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Order
-        fields = ['pk', 'user', 'orderitems', 'order_status', 'total']
+        fields = ['pk', 'user', 'order_status', 'total', 'date', 'orderitems']
 
     def get_total(self, obj):
         value = obj.orderitems.aggregate(total=Sum(
@@ -151,7 +151,7 @@ class OrderSerializer(serializers.ModelSerializer):
             menuitem = orderitem.pop('MenuItem')
 
             if orderitem['quantity'] > menuitem.inventory:
-                raise serializers.ValidationError("oh no There is {} in stock".format(menuitem.inventory))
+                raise serializers.ValidationError("There is only {} of {} in stock.".format(menuitem.name, menuitem.inventory))
             # update inventory 
             menuitem.inventory -= orderitem['quantity']
             menuitem.save()
