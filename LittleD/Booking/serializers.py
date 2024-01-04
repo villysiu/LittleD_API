@@ -1,9 +1,9 @@
 from rest_framework import serializers 
 from .models import Reservation
 import datetime
-import pytz
-class ReservationSerializer(serializers.ModelSerializer):
+from django.core.exceptions import ValidationError
 
+class ReservationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Reservation
@@ -13,17 +13,14 @@ class ReservationSerializer(serializers.ModelSerializer):
 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
         user = self.context['request'].user
-
-        res_date = validated_data['reservation_date']
-        res_time = validated_data['reservation_time']
-        existed = Reservation.objects.filter(reservation_date=res_date, reservation_time=res_time).exists()
-
-        if existed:
+        res_dt = datetime.datetime.combine(validated_data['reservation_date'], validated_data['reservation_time'])
+        if res_dt < datetime.datetime.now()-datetime.timedelta(hours=8):
             raise serializers.ValidationError(
-                "The day and time slot is not available."
-            )
+                "The date and time are not available."
+            ) 
+        
         reservation_obj = Reservation.objects.create(user=user, **validated_data )
         return reservation_obj
         
-    def update(self, instance, validated_data):
-        menuitem = instance.menuitem
+    # def update(self, instance, validated_data):
+    #     menuitem = instance.menuitem
