@@ -93,8 +93,8 @@ class Orders(generics.ListCreateAPIView):
         
         if serialized_order.is_valid(raise_exception=True):
             serialized_order.save()
-            # for user_cart_item in user_cart_items:
-            #     user_cart_item.delete()
+            for user_cart_item in user_cart_items:
+                user_cart_item.delete()
             return Response(serialized_order.data, 201)
 
 
