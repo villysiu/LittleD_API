@@ -1,5 +1,5 @@
 from rest_framework import serializers 
-from .models import Category, MenuItem, Cart, OrderItem, Order, OrderStatus
+from .models import Category, MenuItem, Cart, OrderItem, Order
 from datetime import datetime
 from django.db.models import Sum, ExpressionWrapper,F, DecimalField
 class CategorySerializer(serializers.ModelSerializer):
@@ -124,16 +124,6 @@ class OrderSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
     orderitems = OrderItemSerializer(many=True)
-   
-    # status = serializers.StringRelatedField(read_only=True)
-    # order_status_id = serializers.PrimaryKeyRelatedField(
-    #     source='OrderStatus',
-    #     queryset=OrderStatus.objects.all(), 
-    #     write_only=True,
-    #     required=False,
-        
-    # )
-    # order_status = serializers.CharField()
     total = serializers.SerializerMethodField(read_only=True)
     
     class Meta:

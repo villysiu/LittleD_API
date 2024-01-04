@@ -45,12 +45,7 @@ class Cart(models.Model):
     menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE, db_index=True)
     quantity = models.PositiveSmallIntegerField(default=0)
    
-class OrderStatus(models.Model):
-    slug = models.SlugField()
-    status = models.CharField(max_length=255, db_index=True)
 
-    def __str__(self)-> str:
-        return self.status
     
 class Order(models.Model):
     STATUS_CHOICES = {

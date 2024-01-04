@@ -4,35 +4,35 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 # from rest_framework.decorators import permission_classes
 from .serializers import ReservationSerializer
-from datetime import datetime
+import datetime
+from .permissions import SingleReservationPermission, ReservationPermission
 # Create your views here.
+
+
+    
 class Reservations(generics.ListCreateAPIView):   
     # throttle_classes = [AnonRateThrottle, UserRateThrottle]
-    # queryset = Reservation.objects.all()
+
     serializer_class = ReservationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ReservationPermission]
     ordering_fields=['reservation_date']
+    filterset_fields = ['reservation_date', 'user_id']
     def get_queryset(self):
         queryset = Reservation.objects.all()
         current_user = self.request.user
         upcoming = self.request.query_params.get('upcoming')
-        user_id = self.request.query_params.get('user_id')
-        res_date = self.request.query_params.get('date')
-        
-        if current_user.groups.filter(name='Manager').exists():
-            if user_id:
-                queryset = queryset.filter(user__pk=user_id)
-        else:
+       
+        if not current_user.groups.filter(name='Manager').exists():
             queryset = queryset.filter(user__pk=current_user.id)
 
         if upcoming:
-            queryset = queryset.filter(reservation_date__gte=datetime.today())
-        if res_date:
-            queryset = queryset.filter(reservation_date=res_date)
+            queryset = queryset.filter(reservation_date__gte=datetime.datetime.now()-datetime.timedelta(hours=8))
+       
         return queryset
 
 class SingleReservation(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [SingleReservationPermission]
+
 

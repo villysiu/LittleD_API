@@ -1,7 +1,6 @@
 from rest_framework import serializers 
 from .models import Reservation
 import datetime
-from django.core.exceptions import ValidationError
 
 class ReservationSerializer(serializers.ModelSerializer):
 

@@ -26,8 +26,15 @@ class CartItemPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         return request.user.id == obj.user.id
     
-            
-class OrderPermission(permissions.BasePermission):
+class OrdersPermission(permissions.BasePermission):     
+    def has_permission(self, request, view):
+        user_id = request.query_params.get('user_id')
+        if user_id and not request.user.groups.filter(name='Manager').exists():
+            return False
+        
+        return True
+    
+class SingleOrderPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_authenticated and request.user.groups.filter(name='Manager').exists():
             return True
