@@ -37,22 +37,28 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'rest_framework',
     'rest_framework.authtoken',
     'django_filters',
     'djoser',
     'WineAPI',
-    'Booking'
+    'Booking',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+
 ]
 
 ROOT_URLCONF = 'LittleD.urls'
@@ -132,7 +138,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
-
+    'COERCE_DECIMAL_TO_STRING': False,
     # Add code to assign default authentication classes
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
@@ -148,3 +154,22 @@ REST_FRAMEWORK = {
 DJOSER = {
   "USER_TO_FIELD": "username"
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://192.168.1.174",
+    "http://localhost:3000",
+    "http://192.168.1.174:3000",
+    "http://localhost:3000",
+]
+SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
+# CORS_ALLOW_CREDENTIALS: True
+# CORS_ALLOW_HEADERS = (
+#     "accept",
+#     "authorization",
+#     "content-type",
+#     "user-agent",
+#     "x-csrftoken",
+#     "x-requested-with",
+#     # "Access-Control-Allow-Origin",
+# )
+# CORS_EXPOSE_HEADERS: ("Authorization")

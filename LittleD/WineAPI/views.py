@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, permission_classes
 class Categories(generics.ListCreateAPIView):   
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [CategoriesMenuItemsPermission]
+    # permission_classes = [CategoriesMenuItemsPermission]
 
 class SingleCategory(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Category.objects.all()
@@ -24,7 +24,7 @@ class MenuItems(generics.ListCreateAPIView):
     queryset = MenuItem.objects.select_related('category').all()
     # throttle_classes = [AnonRateThrottle, UserRateThrottle]
     serializer_class = MenuItemSerializer
-    permission_classes = [CategoriesMenuItemsPermission]
+    # permission_classes = [CategoriesMenuItemsPermission]
     
     # pagination_class = CustomPagination
     ordering_fields=['price', 'point', 'year']

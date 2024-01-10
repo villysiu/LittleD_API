@@ -13,7 +13,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), 
         write_only=True,
     )
-
+    # price = serializers.DecimalField(max_digits=6, decimal_places=2)
     class Meta:
         model = MenuItem
         fields = ['pk', 'title',  'year', 'price', 'category', 'varietal','origin', 'point', 'description',
@@ -59,7 +59,7 @@ class CartSerializer(serializers.ModelSerializer):
                   'quantity', 'menuitem_id', 'linetotal', 'unit_price']
 
     def get_linetotal(self, obj):
-        return '{}'.format(obj.quantity * obj.menuitem.price)
+        return float('{}'.format(obj.quantity * obj.menuitem.price))
         
     
     def create(self, validated_data): 

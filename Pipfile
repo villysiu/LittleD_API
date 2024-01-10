@@ -10,6 +10,7 @@ djangorestframework-xml = "*"
 djoser = "*"
 mysqlclient = "*"
 django-filter = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 
