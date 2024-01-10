@@ -41,7 +41,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         
 class CartSerializer(serializers.ModelSerializer):
     
-    menuitem = serializers.StringRelatedField(read_only=True)
+    # menuitem = serializers.StringRelatedField(read_only=True)
     menuitem_id = serializers.PrimaryKeyRelatedField(
         source='MenuItem',
         queryset=MenuItem.objects.all(), 
