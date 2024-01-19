@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from .models import MenuItem, Category, Cart, Order, OrderItem
 from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, OrderItemSerializer
-from .permissions import CategoriesMenuItemsPermission, CategoryMenuItemPermission, CartItemsPermission, CartItemsPermission, OrdersPermission, SingleOrderPermission, SingleOrderItemPermission
+from .permissions import CategoriesMenuItemsPermission, CategoryMenuItemPermission, CartItemsPermission, CartItemsPermission, SingleCartItemPermission, OrdersPermission, SingleOrderPermission, SingleOrderItemPermission
 # , OrdersPermission
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -60,7 +60,7 @@ class CartItmes(generics.ListCreateAPIView, generics.DestroyAPIView):
 
 class SingleCartItem(generics.RetrieveUpdateDestroyAPIView):   
     serializer_class = CartSerializer
-    permission_classes = [IsAuthenticated, SingleOrderItemPermission]
+    permission_classes = [IsAuthenticated, SingleCartItemPermission]
     queryset = Cart.objects.all()
         
 class Orders(generics.ListCreateAPIView):

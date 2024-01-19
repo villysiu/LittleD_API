@@ -156,20 +156,10 @@ DJOSER = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://192.168.1.174",
-    "http://localhost:3000",
-    "http://192.168.1.174:3000",
-    "http://localhost:3000",
+    # "http://192.168.1.174:3000",
+    # "http://localhost:3000",
+    "http://127.0.0.1:8001"
+
 ]
-SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
-# CORS_ALLOW_CREDENTIALS: True
-# CORS_ALLOW_HEADERS = (
-#     "accept",
-#     "authorization",
-#     "content-type",
-#     "user-agent",
-#     "x-csrftoken",
-#     "x-requested-with",
-#     # "Access-Control-Allow-Origin",
-# )
-# CORS_EXPOSE_HEADERS: ("Authorization")
+
+

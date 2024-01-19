@@ -42,7 +42,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
 class CartSerializer(serializers.ModelSerializer):
     
     # menuitem = serializers.StringRelatedField(read_only=True)
-    menuitem_id = serializers.PrimaryKeyRelatedField(
+    menuitem = serializers.PrimaryKeyRelatedField(
         source='MenuItem',
         queryset=MenuItem.objects.all(), 
         write_only=True,
@@ -56,7 +56,9 @@ class CartSerializer(serializers.ModelSerializer):
         model = Cart
         fields = ['pk','user_id', 
                   'menuitem', 
-                  'quantity', 'menuitem_id', 'linetotal', 'unit_price']
+                  'quantity',
+                    'menuitem_id', 
+                    'linetotal', 'unit_price']
 
     def get_linetotal(self, obj):
         return float('{}'.format(obj.quantity * obj.menuitem.price))
@@ -73,7 +75,7 @@ class CartSerializer(serializers.ModelSerializer):
             cartitem_obj.delete()
    
             raise serializers.ValidationError("Out of stock".format(menuitem.inventory))
-        cartitem_obj.quantity += 1
+        cartitem_obj.quantity += validated_data.get('quantity', 1)
         cartitem_obj.save()
         return cartitem_obj
         
