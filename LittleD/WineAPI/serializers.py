@@ -130,6 +130,7 @@ class OrderSerializer(serializers.ModelSerializer):
     )
     orderitems = OrderItemSerializer(many=True)
     total = serializers.SerializerMethodField(read_only=True)
+    order_status = serializers.CharField(source='get_order_status_display')
     
     class Meta:
         model = Order
