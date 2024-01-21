@@ -49,20 +49,22 @@ class CartSerializer(serializers.ModelSerializer):
     )
    
     unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, source='menuitem.price', read_only=True)
-
     linetotal = serializers.SerializerMethodField()
-
+    title = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Cart
         fields = ['pk','user_id', 
-                  'menuitem', 
+                  'menuitem_id', 
                   'quantity',
-                    'menuitem_id', 
-                    'linetotal', 'unit_price']
+                'menuitem', 
+                'linetotal', 'unit_price', 'title']
 
     def get_linetotal(self, obj):
         return float('{}'.format(obj.quantity * obj.menuitem.price))
         
+    def get_title(self, obj):
+        print(obj.menuitem)
+        return "{} {}".format(obj.menuitem.year, obj.menuitem.title)
     
     def create(self, validated_data): 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
@@ -92,24 +94,30 @@ class CartSerializer(serializers.ModelSerializer):
         return instance
     
 class OrderItemSerializer(serializers.ModelSerializer):   
-    menuitem = serializers.StringRelatedField(read_only=True)
+   
+    menuitem = serializers.PrimaryKeyRelatedField(read_only=True)
     menuitem_id = serializers.PrimaryKeyRelatedField(
         source='MenuItem',
         queryset=MenuItem.objects.all(), 
         write_only=True,
     )
-    line_total = serializers.SerializerMethodField(read_only=True)
 
+    line_total = serializers.SerializerMethodField(read_only=True)
+    title = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = OrderItem
         fields = [ 
-            'pk', 'menuitem_id', 'menuitem', 
-            'quantity', 'unit_price', 'line_total' ]
+            'pk', 'menuitem', 'menuitem_id',
+            'quantity', 'unit_price', 'line_total','title' ]
         
     
     def get_line_total(self, obj):
         return obj.quantity * obj.unit_price
 
+    def get_title(self, obj):
+        print(obj.menuitem)
+        return "{} {}".format(obj.menuitem.year, obj.menuitem.title)
+    
     def update(self, instance, validated_data):
         menuitem = instance.menuitem
         if menuitem.inventory + instance.quantity < validated_data['quantity']:
@@ -139,7 +147,7 @@ class OrderSerializer(serializers.ModelSerializer):
     def get_total(self, obj):
         value = obj.orderitems.aggregate(total=Sum(
             ExpressionWrapper(
-                F('quantity') * F('unit_price'),
+                F('quantity') * F('unit_price'), 
                 output_field=DecimalField()
         )))['total']
     
