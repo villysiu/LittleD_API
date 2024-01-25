@@ -1,6 +1,6 @@
 from rest_framework import serializers 
 from .models import Category, MenuItem, Cart, OrderItem, Order
-from datetime import datetime
+from datetime import date
 from django.db.models import Sum, ExpressionWrapper,F, DecimalField
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,7 +63,6 @@ class CartSerializer(serializers.ModelSerializer):
         return float('{}'.format(obj.quantity * obj.menuitem.price))
         
     def get_title(self, obj):
-        print(obj.menuitem)
         return "{} {}".format(obj.menuitem.year, obj.menuitem.title)
     
     def create(self, validated_data): 
@@ -115,7 +114,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
         return obj.quantity * obj.unit_price
 
     def get_title(self, obj):
-        print(obj.menuitem)
+        
         return "{} {}".format(obj.menuitem.year, obj.menuitem.title)
     
     def update(self, instance, validated_data):
@@ -138,7 +137,7 @@ class OrderSerializer(serializers.ModelSerializer):
     )
     orderitems = OrderItemSerializer(many=True)
     total = serializers.SerializerMethodField(read_only=True)
-    order_status = serializers.CharField(source='get_order_status_display')
+    order_status = serializers.CharField(source='get_order_status_display', read_only=True)
     
     class Meta:
         model = Order
@@ -155,11 +154,12 @@ class OrderSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         print(validated_data)
+        print(date.today())
         # {'orderitems': [OrderedDict([('MenuItem', <MenuItem: 2019 Chester-Kidder>), ('quantity', 2)]), 
         #                 OrderedDict([('MenuItem', <MenuItem: 2020 ACS>), ('quantity', 1)])]}
         orderitems = validated_data.pop('orderitems')
         user = self.context['request'].user
-        order_obj = Order.objects.create(user=user, date=datetime.today())
+        order_obj = Order.objects.create(user=user, date=date.today())
         
         for orderitem in orderitems:
             menuitem = orderitem.pop('MenuItem')

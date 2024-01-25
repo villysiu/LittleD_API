@@ -24,8 +24,11 @@ class Reservations(generics.ListCreateAPIView):
             queryset = queryset.filter(user__pk=current_user.id)
 
         if upcoming:
-            queryset = queryset.filter(reservation_date__gte=datetime.datetime.now()-datetime.timedelta(hours=8))
-       
+            print(upcoming)
+            if upcoming == 'true':
+                queryset = queryset.filter(reservation_date__gte=datetime.datetime.now()-datetime.timedelta(hours=8))
+            else:
+                queryset = queryset.filter(reservation_date__lt=datetime.datetime.now()-datetime.timedelta(hours=8))
         return queryset
 
 class SingleReservation(generics.RetrieveUpdateDestroyAPIView):   
