@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from .serializers import ReservationSerializer
 import datetime
 from .permissions import SingleReservationPermission, ReservationPermission
+from django.db.models import DateTimeField, ExpressionWrapper, F
+from django.db import models
 # Create your views here.
     
 class Reservations(generics.ListCreateAPIView):   
@@ -24,11 +26,24 @@ class Reservations(generics.ListCreateAPIView):
             queryset = queryset.filter(user__pk=current_user.id)
 
         if upcoming:
-            print(upcoming)
+            
+            # https://docs.djangoproject.com/en/5.0/topics/db/aggregation/
+            current_dt = datetime.datetime.now()-datetime.timedelta(hours=8)
+            today = current_dt.date()
+            now = current_dt.time()
+            print(current_dt)
+            print(today)
+            print(now)
+            current = queryset.filter(
+                models.Q(reservation_date__gt=today) | models.Q(
+                    reservation_date=today,
+                    reservation_time__gt=now
+                )
+            )
             if upcoming == 'true':
-                queryset = queryset.filter(reservation_date__gte=datetime.datetime.now()-datetime.timedelta(hours=8))
+                return current
             else:
-                queryset = queryset.filter(reservation_date__lt=datetime.datetime.now()-datetime.timedelta(hours=8))
+                return queryset.exclude(id__in=current)
         return queryset
 
 class SingleReservation(generics.RetrieveUpdateDestroyAPIView):   

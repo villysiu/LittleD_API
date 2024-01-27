@@ -21,16 +21,22 @@ class SingleReservationPermission(permissions.BasePermission):
         manager can see reservations of all user 
         manager can update and destroy past and upcoming reservations
         """
-        
+        print("inside single res perm")
+        print(obj)
+        res_dt = datetime.datetime.combine(obj.reservation_date, obj.reservation_time)
+        print(res_dt)
+        print(datetime.datetime.now()-datetime.timedelta(hours=8))
+        print(res_dt < datetime.datetime.now()-datetime.timedelta(hours=8))
         if request.user.groups.filter(name='Manager').exists():
             return True
         else:
             if request.method in ['PATCH', 'DESTROY']:
                 
                 res_dt = datetime.datetime.combine(obj.reservation_date, obj.reservation_time)
+                
                 if res_dt < datetime.datetime.now()-datetime.timedelta(hours=8):
                     return False
-                
+            
             return request.user.id == obj.user.id
                 
         

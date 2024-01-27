@@ -50,6 +50,7 @@ class Reservation(models.Model):
         validators=[MaxValueValidator(10), MinValueValidator(1)], default=1
     )
     
+    
     class Meta:
         unique_together = ('reservation_date', 'reservation_time')
         ordering = ['reservation_date', 'reservation_time']

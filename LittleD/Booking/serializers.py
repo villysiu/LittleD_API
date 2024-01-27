@@ -4,9 +4,11 @@ import datetime
 
 class ReservationSerializer(serializers.ModelSerializer):
 
+    
     class Meta:
         model = Reservation
         fields = ['pk','user_id', 'no_of_guests', 'reservation_date', 'reservation_time']
+    
     
     def create(self, validated_data): 
 
