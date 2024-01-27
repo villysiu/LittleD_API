@@ -14,7 +14,7 @@ class Reservations(generics.ListCreateAPIView):
     # throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     serializer_class = ReservationSerializer
-    permission_classes = [IsAuthenticated, ReservationPermission]
+    permission_classes = [ReservationPermission]
     ordering_fields=['reservation_date']
     filterset_fields = ['reservation_date', 'user_id']
     def get_queryset(self):
@@ -22,6 +22,9 @@ class Reservations(generics.ListCreateAPIView):
         current_user = self.request.user
         upcoming = self.request.query_params.get('upcoming')
        
+        if current_user.is_anonymous:
+            return Reservation.objects.values('reservation_date', 'reservation_time')
+        
         if not current_user.groups.filter(name='Manager').exists():
             queryset = queryset.filter(user__pk=current_user.id)
 
