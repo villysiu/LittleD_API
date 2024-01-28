@@ -28,6 +28,7 @@ class Reservations(generics.ListCreateAPIView):
         if not current_user.groups.filter(name='Manager').exists():
             queryset = queryset.filter(user__pk=current_user.id)
 
+
         if upcoming:
             
             # https://docs.djangoproject.com/en/5.0/topics/db/aggregation/
@@ -47,6 +48,7 @@ class Reservations(generics.ListCreateAPIView):
                 return current
             else:
                 return queryset.exclude(id__in=current)
+            
         return queryset
 
 class SingleReservation(generics.RetrieveUpdateDestroyAPIView):   
