@@ -13,9 +13,9 @@ class MenuItemSerializer(serializers.ModelSerializer):
     #     queryset=Category.objects.all(), 
     #     write_only=True,
     # )
-    
+   
     categories = serializers.PrimaryKeyRelatedField(
-        source='Category',
+        # source='Category',
        
         many=True,
         read_only=True,
