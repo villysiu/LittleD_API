@@ -1,36 +1,35 @@
 from rest_framework import serializers 
-from .models import Category, MenuItem, Cart, OrderItem, Order
+from .models import Category, MenuItem, Cart, OrderItem, Order, Milk, MenuitemCategory
 from datetime import date
 from django.db.models import Sum, ExpressionWrapper,F, DecimalField
+
 class CategorySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Category
         fields = ['pk','title', 'slug']
 
+class MilkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Milk
+        fields = ['pk','title', 'slug']
+
 class MenuItemSerializer(serializers.ModelSerializer):
-    # category_id = serializers.PrimaryKeyRelatedField(
-    #     source='Category',
-    #     queryset=Category.objects.all(), 
-    #     write_only=True,
-    # )
-   
-    categories = serializers.PrimaryKeyRelatedField(
-        # source='Category',
-       
-        many=True,
-        read_only=True,
-    )
+    
     class Meta:
         model = MenuItem
-        fields = ['pk', 'title', 'price', 'categories', 'description',
-                #   'category_id', 
-                  'inventory']
+        fields = ['pk', 'title', 'price', 'description',
+                  'inventory', 'milk']
     
-     # POST
-    # def create(self, validated_data):
-    #     category = validated_data.pop('Category')
-    #     menuitem_obj = MenuItem.objects.create(category=category, **validated_data)
-    #     return menuitem_obj
+   
+    # POST
+    def create(self, validated_data):
+        print("in serializer")
+        print(validated_data)
+       
+        menuitem_obj = MenuItem.objects.create( **validated_data)
+        return menuitem_obj
+        # return None
     
     # #PATCH/ PUT
     # def update(self, instance, validated_data):
@@ -45,10 +44,14 @@ class MenuItemSerializer(serializers.ModelSerializer):
     #     instance.inventory = validated_data.get('inventory', instance.inventory)
     #     instance.save()
     #     return instance
-        
+
+class MenuitemCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuitemCategory
+        fields = "__all__"
+
 class CartSerializer(serializers.ModelSerializer):
-    
-    # menuitem = serializers.StringRelatedField(read_only=True)
+
     menuitem = serializers.PrimaryKeyRelatedField(
         source='MenuItem',
         queryset=MenuItem.objects.all(), 
@@ -58,19 +61,21 @@ class CartSerializer(serializers.ModelSerializer):
     unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, source='menuitem.price', read_only=True)
     linetotal = serializers.SerializerMethodField()
     title = serializers.SerializerMethodField(read_only=True)
+    # milk_alternative = serializers.CharField(source='get_milk_alternative_display', read_only=True)
+
     class Meta:
         model = Cart
         fields = ['pk','user_id', 
                   'menuitem_id', 
                   'quantity',
                 'menuitem', 
-                'linetotal', 'unit_price', 'title']
+                'linetotal', 'unit_price', 'title', 'milk']
 
     def get_linetotal(self, obj):
         return float('{}'.format(obj.quantity * obj.menuitem.price))
         
     def get_title(self, obj):
-        return "{} {}".format(obj.menuitem.year, obj.menuitem.title)
+        return obj.menuitem.title
     
     def create(self, validated_data): 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
@@ -79,11 +84,11 @@ class CartSerializer(serializers.ModelSerializer):
 
         cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user)
         if menuitem.inventory <= cartitem_obj.quantity:
-
             cartitem_obj.delete()
-   
             raise serializers.ValidationError("Out of stock".format(menuitem.inventory))
+        
         cartitem_obj.quantity += validated_data.get('quantity', 1)
+        cartitem_obj.milk_alternative = validated_data.get('milk_alternative', 'X')
         cartitem_obj.save()
         return cartitem_obj
         

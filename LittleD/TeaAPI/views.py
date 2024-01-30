@@ -1,13 +1,14 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .models import MenuItem, Category, Cart, Order, OrderItem
-from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, OrderItemSerializer
+from .models import MenuItem, Category, Cart, Order, OrderItem, Milk, MenuitemCategory
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, OrderItemSerializer, MilkSerializer, MenuitemCategorySerializer
 from .permissions import CategoriesMenuItemsPermission, CategoryMenuItemPermission, CartItemsPermission, CartItemsPermission, SingleCartItemPermission, OrdersPermission, SingleOrderPermission, SingleOrderItemPermission
 # , OrdersPermission
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
-
+import json
+from django.forms.models import model_to_dict
 # Create your views here.
 class Categories(generics.ListCreateAPIView):   
     queryset = Category.objects.all()
@@ -19,23 +20,81 @@ class SingleCategory(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CategorySerializer
     permission_classes = [CategoryMenuItemPermission]
 
+class Milks(generics.ListCreateAPIView):   
+    queryset = Milk.objects.all()
+    serializer_class = MilkSerializer
+    # permission_classes = [CategoriesMenuItemsPermission]
+
+class SingleCategory(generics.RetrieveUpdateDestroyAPIView):   
+    queryset = Milk.objects.all()
+    serializer_class = MilkSerializer
+    permission_classes = [CategoryMenuItemPermission]
 
 class MenuItems(generics.ListCreateAPIView):   
     queryset = MenuItem.objects.all()
     # throttle_classes = [AnonRateThrottle, UserRateThrottle]
     serializer_class = MenuItemSerializer
-    # permission_classes = [CategoriesMenuItemsPermission]
+    permission_classes = [CategoriesMenuItemsPermission]
     
     # pagination_class = CustomPagination
     ordering_fields=['price']
     search_fields = ['title','category__title']
     # filterset_fields = ['category_id', 'category__slug']
 
+    # def create(self, request, *args, **kwargs):
+    #     current_user = self.request.user
+    #     print('in create')
+        
+    #     # print(request.data)
+    #     # <QueryDict: {'price': ['5'], 'title': ['Res neassad sfd Green Tea'], 
+    #     # 'categories': ['[2, 1]'], 'description': ['Res dsf nead Green Tea Green Tea '], 
+    #     # 'inventory': ['10'], 'milk': ['1']}>
+    #     # print(request.data['categories'])
+        
+    #     data = {
+    #         'title': 'apple', 'price': 5, 'description': 'llalalal', 
+    #         'inventory': 10, 'milk': 1,
+    #         # 'categories': [
+    #         #     {'pk': 1 , "title": "Milk Tea", "slug": "milk_tea"
+    #         #     },
+	#         #     {"pk": 2 , "title": "Jasmine Green Tea", "slug": "green_tea"
+    #         #     }
+    #             # model_to_dict(Category.objects.get(pk=1)),
+    #             # model_to_dict(Category.objects.get(pk=2))
+               
+    #         # ]
+    #     }
+        
+    #     # print(sss)
+    #     serialized_menuitem = MenuItemSerializer(
+            
+    #         data = data
+    #         # context = {'request': request}
+    #     )
+        
+    #     if serialized_menuitem.is_valid(raise_exception=True):
+    #         serialized_menuitem.save()
+            
+    #         return Response(serialized_menuitem.data, 201)
+
+
+        # return Response({'message': 'Testing.'}, 200)
 
     
 class SingleMenuItem(generics.RetrieveUpdateDestroyAPIView):   
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
+    permission_classes = [CategoryMenuItemPermission]
+
+class MenuitemCategories(generics.ListCreateAPIView):
+    queryset = MenuitemCategory.objects.all()
+    serializer_class = MenuitemCategorySerializer
+   
+    
+    
+class SingleMenuitemCategory(generics.RetrieveUpdateDestroyAPIView):  
+    queryset = MenuitemCategory.objects.all()
+    serializer_class = MenuitemCategorySerializer
     permission_classes = [CategoryMenuItemPermission]
 
 class CartItmes(generics.ListCreateAPIView, generics.DestroyAPIView):
