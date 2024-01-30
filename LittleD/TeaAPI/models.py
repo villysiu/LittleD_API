@@ -42,6 +42,8 @@ class MenuitemCategory(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
 
+    class Meta: 
+        unique_together = ('category', 'menuitem')
     def __str__(self):
         return "{}_{}".format(self.menuitem.__str__(), self.category.__str__())
     

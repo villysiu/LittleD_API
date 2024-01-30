@@ -37,7 +37,7 @@ class MenuItems(generics.ListCreateAPIView):
     
     # pagination_class = CustomPagination
     ordering_fields=['price']
-    search_fields = ['title','category__title']
+    search_fields = ['title']
     # filterset_fields = ['category_id', 'category__slug']
 
     
@@ -49,7 +49,7 @@ class SingleMenuItem(generics.RetrieveUpdateDestroyAPIView):
 class MenuitemCategories(generics.ListCreateAPIView):
     queryset = MenuitemCategory.objects.all()
     serializer_class = MenuitemCategorySerializer
-   
+    filterset_fields = ['category_id', 'category__slug']
     
     
 class SingleMenuitemCategory(generics.RetrieveUpdateDestroyAPIView):  
