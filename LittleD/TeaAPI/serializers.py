@@ -16,10 +16,11 @@ class MilkSerializer(serializers.ModelSerializer):
 
 class MenuItemSerializer(serializers.ModelSerializer):
     
+    # milk = serializers.StringRelatedField()
     class Meta:
         model = MenuItem
         fields = ['pk', 'title', 'price', 'description',
-                  'inventory', 'milk']
+                  'inventory', 'milk_id' ]
     
    
     # POST
@@ -65,22 +66,23 @@ class CartSerializer(serializers.ModelSerializer):
     )
     unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, source='menuitem.price', read_only=True)
     linetotal = serializers.SerializerMethodField()
-    title = serializers.SerializerMethodField(read_only=True)
+    # title = serializers.SerializerMethodField(read_only=True)
     # menuitem = serializers.PrimaryKeyRelatedField()
-    milk = serializers.StringRelatedField(read_only=True)
+    # milk = serializers.StringRelatedField(read_only=True)
     class Meta:
         model = Cart
         fields = ['pk','user_id', 
-                  'menuitem_pk', 
-                  'quantity',
-                'menuitem_id', 
-                'linetotal', 'unit_price', 'title', 'milk', 'milk_pk']
+                  'menuitem_pk', 'menuitem_id', 
+                #   'title'
+                  'quantity','linetotal', 'unit_price',
+                    'milk_id', 
+                    'milk_pk']
 
     def get_linetotal(self, obj):
         return float('{}'.format(obj.quantity * obj.menuitem.price))
         
-    def get_title(self, obj):
-        return obj.menuitem.title
+    # def get_title(self, obj):
+    #     return obj.menuitem.title
     
     def create(self, validated_data): 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
