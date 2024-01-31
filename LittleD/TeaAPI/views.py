@@ -40,17 +40,16 @@ class MenuItems(generics.ListCreateAPIView):
     search_fields = ['title']
     # filterset_fields = ['category_id', 'category__slug']
 
-    
 class SingleMenuItem(generics.RetrieveUpdateDestroyAPIView):   
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
     permission_classes = [CategoryMenuItemPermission]
 
+
 class MenuitemCategories(generics.ListCreateAPIView):
     queryset = MenuitemCategory.objects.all()
     serializer_class = MenuitemCategorySerializer
     filterset_fields = ['category_id', 'category__slug']
-    
     
 class SingleMenuitemCategory(generics.RetrieveUpdateDestroyAPIView):  
     queryset = MenuitemCategory.objects.all()
@@ -106,7 +105,7 @@ class Orders(generics.ListCreateAPIView):
         orderitems=[]
         for item in list(user_cart_items.values()):
             orderitems.append(item)
-        # print(orderitems)
+        print(orderitems)
         
         serialized_order = OrderSerializer(
             data = {'orderitems': orderitems}, 

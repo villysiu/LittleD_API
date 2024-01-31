@@ -68,6 +68,7 @@ class Order(models.Model):
     total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
     # date = models.DateTiField(db_index=True, null=True, blank=True)
     date = models.DateField(db_index=True, null=True, blank=True)
+
  
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='orderitems', on_delete=models.CASCADE)
@@ -75,7 +76,8 @@ class OrderItem(models.Model):
     quantity = models.PositiveSmallIntegerField(default=0)
     unit_price = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
     line_total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
-  
+    milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
+
     class Meta:
-        unique_together = ('order', 'menuitem')
+        unique_together = ('order', 'menuitem', 'milk')
 
