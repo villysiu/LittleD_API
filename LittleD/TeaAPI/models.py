@@ -14,9 +14,10 @@ class Category(models.Model):
 
 class Milk(models.Model):
     slug = models.SlugField()
-
     title = models.CharField(max_length=255, db_index=True)
-
+    price = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0, validators=[MinValueValidator(0)]
+    )
     # for serializers.StringRelatedField to display string
     def __str__(self)-> str:
         return self.title

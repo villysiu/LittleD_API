@@ -66,17 +66,13 @@ class CartSerializer(serializers.ModelSerializer):
     )
     unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, source='menuitem.price', read_only=True)
     linetotal = serializers.SerializerMethodField()
-    # title = serializers.SerializerMethodField(read_only=True)
-    # menuitem = serializers.PrimaryKeyRelatedField()
-    # milk = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Cart
         fields = ['pk','user_id', 
                   'menuitem_pk', 'menuitem_id', 
-                #   'title'
                   'quantity','linetotal', 'unit_price',
-                    'milk_id', 
-                    'milk_pk']
+                    'milk_id', 'milk_pk']
 
     def get_linetotal(self, obj):
         return float('{}'.format(obj.quantity * obj.menuitem.price))
@@ -101,12 +97,14 @@ class CartSerializer(serializers.ModelSerializer):
         return cartitem_obj
         
     def update(self, instance, validated_data):
+        print(validated_data)
         menuitem = instance.menuitem
 
-        if menuitem.inventory  < validated_data['quantity']:
+        if 'quantity' in validated_data and menuitem.inventory  < validated_data['quantity']:
             raise serializers.ValidationError("There is only {} in stock".format(menuitem.inventory))
         
         instance.quantity = validated_data.get('quantity', instance.quantity)  
+        instance.milk = validated_data.get('Milk', instance.milk) 
         instance.save()
         
         
