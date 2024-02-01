@@ -12,7 +12,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class MilkSerializer(serializers.ModelSerializer):
     class Meta:
         model = Milk
-        fields = ['pk','title', 'slug']
+        fields = "__all__"
 
 class MenuItemSerializer(serializers.ModelSerializer):
     
@@ -64,7 +64,9 @@ class CartSerializer(serializers.ModelSerializer):
         queryset=Milk.objects.all(), 
         write_only=True,
     )
-    unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, source='menuitem.price', read_only=True)
+
+    # unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, source='menuitem.price', read_only=True)
+    unit_price = serializers.SerializerMethodField()
     linetotal = serializers.SerializerMethodField()
 
     class Meta:
@@ -74,8 +76,11 @@ class CartSerializer(serializers.ModelSerializer):
                   'quantity','linetotal', 'unit_price',
                     'milk_id', 'milk_pk']
 
+    def get_unit_price(self, obj):
+        return float('{}'.format(obj.menuitem.price+obj.milk.price))
+    
     def get_linetotal(self, obj):
-        return float('{}'.format(obj.quantity * obj.menuitem.price))
+        return float('{}'.format(obj.quantity * (obj.menuitem.price + obj.milk.price)))
         
     # def get_title(self, obj):
     #     return obj.menuitem.title
