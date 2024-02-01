@@ -49,7 +49,7 @@ class SingleMenuItem(generics.RetrieveUpdateDestroyAPIView):
 class MenuitemCategories(generics.ListCreateAPIView):
     queryset = MenuitemCategory.objects.all()
     serializer_class = MenuitemCategorySerializer
-    filterset_fields = ['category_id', 'category__slug']
+    filterset_fields = ['category_id', 'menuitem_id']
     
 class SingleMenuitemCategory(generics.RetrieveUpdateDestroyAPIView):  
     queryset = MenuitemCategory.objects.all()

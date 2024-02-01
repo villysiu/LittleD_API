@@ -16,42 +16,68 @@ class MilkSerializer(serializers.ModelSerializer):
 
 class MenuItemSerializer(serializers.ModelSerializer):
     
-    # milk = serializers.StringRelatedField()
+    milk_pk = serializers.PrimaryKeyRelatedField(
+        source='Milk',
+        queryset=Milk.objects.all(), 
+        write_only=True,
+    )
+
     class Meta:
         model = MenuItem
         fields = ['pk', 'title', 'price', 'description',
-                  'inventory', 'milk_id' ]
+                  'inventory', 'milk_id', 'milk_pk' ]
     
    
     # POST
     def create(self, validated_data):
         print("in serializer")
         print(validated_data)
-       
-        menuitem_obj = MenuItem.objects.create( **validated_data)
+        milk_obj = validated_data.pop('Milk')
+        menuitem_obj = MenuItem.objects.create( milk=milk_obj, **validated_data)
         return menuitem_obj
-        # return None
     
     # #PATCH/ PUT
-    # def update(self, instance, validated_data):
-    #     instance.title = validated_data.get('title', instance.title)
-    #     instance.price = validated_data.get('price', instance.price)
-    #     instance.category = validated_data.get('Category', instance.category)
-    #     instance.year = validated_data.get('year', instance.year)
-    #     instance.varietal = validated_data.get('varietal', instance.varietal)
-    #     instance.origin = validated_data.get('origin', instance.origin)
-    #     instance.point = validated_data.get('point', instance.point)
-    #     instance.description = validated_data.get('description', instance.description)
-    #     instance.inventory = validated_data.get('inventory', instance.inventory)
-    #     instance.save()
-    #     return instance
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.price = validated_data.get('price', instance.price)
+        instance.description = validated_data.get('description', instance.description)
+        instance.inventory = validated_data.get('inventory', instance.inventory)
+        instance.milk = validated_data.get('Milk', instance.milk)
+        instance.save()
+        return instance
 
 class MenuitemCategorySerializer(serializers.ModelSerializer):
-    menuitem = MenuItemSerializer()
+    menuitem_pk = serializers.PrimaryKeyRelatedField(
+        source='MenuItem',
+        queryset=MenuItem.objects.all(), 
+        write_only=True,
+    )
+    category_pk = serializers.PrimaryKeyRelatedField(
+        source='Category',
+        queryset=Category.objects.all(), 
+        write_only=True,
+    )
+    menuitem = MenuItemSerializer(read_only=True)
     class Meta:
         model = MenuitemCategory
-        fields = ["menuitem"]
+        fields = [ "pk","menuitem_pk", "category_pk", 'category_id', 'menuitem_id', 'menuitem']
 
+    def create(self, validated_data): 
+        print(validated_data)
+        menuitem = validated_data.pop('MenuItem')
+        category = validated_data.pop('Category')
+        menuitem_category_obj = MenuitemCategory.objects.create(menuitem=menuitem, category=category)
+        
+        menuitem_category_obj.save()
+        return menuitem_category_obj
+
+    def update(self, instance, validated_data):
+        instance.menuitem = validated_data.get('MenuItem', instance.menuitem)
+        instance.category = validated_data.get('Category', instance.category)
+        instance.save()
+        return instance
+
+    
 class CartSerializer(serializers.ModelSerializer):
 
     menuitem_pk = serializers.PrimaryKeyRelatedField(
@@ -65,7 +91,6 @@ class CartSerializer(serializers.ModelSerializer):
         write_only=True,
     )
 
-    # unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, source='menuitem.price', read_only=True)
     unit_price = serializers.SerializerMethodField()
     linetotal = serializers.SerializerMethodField()
 
@@ -82,9 +107,7 @@ class CartSerializer(serializers.ModelSerializer):
     def get_linetotal(self, obj):
         return float('{}'.format(obj.quantity * (obj.menuitem.price + obj.milk.price)))
         
-    # def get_title(self, obj):
-    #     return obj.menuitem.title
-    
+
     def create(self, validated_data): 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
         print(validated_data)
