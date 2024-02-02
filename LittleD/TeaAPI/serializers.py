@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Category, MenuItem, Cart, OrderItem, Order, Milk, MenuitemCategory
 from datetime import date
 from django.db.models import Sum, ExpressionWrapper,F, DecimalField
-
+from decimal import *
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -93,20 +93,23 @@ class CartSerializer(serializers.ModelSerializer):
 
     unit_price = serializers.SerializerMethodField()
     linetotal = serializers.SerializerMethodField()
+    tax = serializers.SerializerMethodField()
 
     class Meta:
         model = Cart
         fields = ['pk','user_id', 
                   'menuitem_pk', 'menuitem_id', 
-                  'quantity','linetotal', 'unit_price',
+                  'quantity','linetotal', 'unit_price','tax',
                     'milk_id', 'milk_pk']
 
     def get_unit_price(self, obj):
-        return float('{}'.format(obj.menuitem.price+obj.milk.price))
+        return obj.menuitem.price + obj.milk.price
     
     def get_linetotal(self, obj):
-        return float('{}'.format(obj.quantity * (obj.menuitem.price + obj.milk.price)))
+        return obj.quantity * self.get_unit_price(obj)
         
+    def get_tax(self, obj):
+        return self.get_linetotal(obj) * Decimal(0.1)
 
     def create(self, validated_data): 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
@@ -195,10 +198,10 @@ class OrderSerializer(serializers.ModelSerializer):
     orderitems = OrderItemSerializer(many=True)
     total = serializers.SerializerMethodField(read_only=True)
     order_status = serializers.CharField(source='get_order_status_display', read_only=True)
-    
+    tax = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Order
-        fields = ['pk', 'user', 'order_status', 'total', 'date', 'orderitems']
+        fields = ['pk', 'user', 'date', 'order_status', 'total','tax', 'orderitems']
 
     def get_total(self, obj):
         value = obj.orderitems.aggregate(total=Sum(
@@ -208,6 +211,9 @@ class OrderSerializer(serializers.ModelSerializer):
         )))['total']
     
         return value
+    
+    def get_tax(self, obj):
+        return self.get_total(obj) * Decimal(0.1)
     
     def create(self, validated_data):
         print(validated_data)
