@@ -109,7 +109,7 @@ class CartSerializer(serializers.ModelSerializer):
         return obj.quantity * self.get_unit_price(obj)
         
     def get_tax(self, obj):
-        return self.get_linetotal(obj) * Decimal(0.1)
+        return self.get_linetotal(obj) * Decimal('0.1')
 
     def create(self, validated_data): 
         # Should always return a user since only authenticated user can access ( isAuthenticated)
@@ -155,27 +155,27 @@ class OrderItemSerializer(serializers.ModelSerializer):
         queryset=Milk.objects.all(), 
         write_only=True,
     )
+    unit_price = serializers.SerializerMethodField(read_only=True)
     line_total = serializers.SerializerMethodField(read_only=True)
     title = serializers.SerializerMethodField(read_only=True)
-    # milk_title = serializers.SerializerMethodField(read_only=True)
+
+
     class Meta:
         model = OrderItem
         fields = [ 
             'pk', 'menuitem', 'menuitem_id',
             'quantity', 'unit_price', 'line_total','title','milk', 'milk_id'
-            # ,'milk_title'
             ]
         
+    def get_unit_price(self, obj):
+        return obj.menuitem.price + obj.milk.price
     
     def get_line_total(self, obj):
-        return obj.quantity * obj.unit_price
+        return obj.quantity * self.get_unit_price(obj)
 
     def get_title(self, obj):
         return obj.menuitem.title
-    
-    # def get_milk_title(self, obj):
-    #     print(obj.milk)
-    #     return obj.milk
+
     
     def update(self, instance, validated_data):
         menuitem = instance.menuitem
@@ -196,24 +196,30 @@ class OrderSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
     orderitems = OrderItemSerializer(many=True)
-    total = serializers.SerializerMethodField(read_only=True)
     order_status = serializers.CharField(source='get_order_status_display', read_only=True)
+    subtotal = serializers.SerializerMethodField(read_only=True)
     tax = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Order
-        fields = ['pk', 'user', 'date', 'order_status', 'total','tax', 'orderitems']
+        fields = ['pk', 'user', 'date', 'order_status', 'subtotal',
+                  'tax',
+                    'orderitems']
 
-    def get_total(self, obj):
+    def get_subtotal(self, obj):
+        print('in get subtotal')
+        print(obj.orderitems)
         value = obj.orderitems.aggregate(total=Sum(
             ExpressionWrapper(
-                F('quantity') * F('unit_price'), 
+                F('quantity') * (F('menuitem__price') + F('milk__price')), 
+
                 output_field=DecimalField()
         )))['total']
     
         return value
     
     def get_tax(self, obj):
-        return self.get_total(obj) * Decimal(0.1)
+        return self.get_subtotal(obj) * Decimal('0.1')
     
     def create(self, validated_data):
         print(validated_data)
@@ -221,7 +227,8 @@ class OrderSerializer(serializers.ModelSerializer):
     #    {'orderitems': [OrderedDict([('MenuItem', <MenuItem: Lavendar Milk Tea>), ('quantity', 1), ('Milk', <Milk: 2% Milk>)]), 
     #                    OrderedDict([('MenuItem', <MenuItem: Boba Green Milk Tea>), ('quantity', 2), ('Milk', <Milk: 2% Milk>)])]}
         orderitems = validated_data.pop('orderitems')
-        print(orderitems)
+        # print(orderitems)
+        # [OrderedDict([('MenuItem', <MenuItem: Boba Black Milk Tea>), ('quantity', 3), ('Milk', <Milk: Soy Milk>)])]
         user = self.context['request'].user
         order_obj = Order.objects.create(user=user, date=date.today())
         
@@ -234,7 +241,7 @@ class OrderSerializer(serializers.ModelSerializer):
             # update inventory 
             menuitem.inventory -= orderitem['quantity']
             menuitem.save()
-            OrderItem.objects.create(order = order_obj, menuitem=menuitem, milk=milk, unit_price=menuitem.price, **orderitem )
+            OrderItem.objects.create(order = order_obj, menuitem=menuitem, milk=milk, **orderitem )
             
         order_obj.save()
         return order_obj
