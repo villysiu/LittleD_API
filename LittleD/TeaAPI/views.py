@@ -95,6 +95,7 @@ class Orders(generics.ListCreateAPIView):
         return queryset
     
     def create(self, request, *args, **kwargs):
+
         current_user = self.request.user
         user_cart_items = Cart.objects.filter(user=current_user)
 #         #<QuerySet [<Cart: Cart object (14)>, <Cart: Cart object (15)>]>
@@ -108,7 +109,7 @@ class Orders(generics.ListCreateAPIView):
         print(orderitems)
         
         serialized_order = OrderSerializer(
-            data = {'orderitems': orderitems}, 
+            data = {'orderitems': orderitems, 'tip': request.data['tip']}, 
             context = {'request': request}
         )
         

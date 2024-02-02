@@ -199,16 +199,15 @@ class OrderSerializer(serializers.ModelSerializer):
     order_status = serializers.CharField(source='get_order_status_display', read_only=True)
     subtotal = serializers.SerializerMethodField(read_only=True)
     tax = serializers.SerializerMethodField(read_only=True)
-
+    total = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Order
         fields = ['pk', 'user', 'date', 'order_status', 'subtotal',
-                  'tax',
+                  'tax', 'tip', 'total',
                     'orderitems']
 
     def get_subtotal(self, obj):
-        print('in get subtotal')
-        print(obj.orderitems)
+    
         value = obj.orderitems.aggregate(total=Sum(
             ExpressionWrapper(
                 F('quantity') * (F('menuitem__price') + F('milk__price')), 
@@ -220,6 +219,11 @@ class OrderSerializer(serializers.ModelSerializer):
     
     def get_tax(self, obj):
         return self.get_subtotal(obj) * Decimal('0.1')
+    def get_total(self, obj):
+        return self.get_subtotal(obj) * Decimal('1.1') + obj.tip
+
+    
+  
     
     def create(self, validated_data):
         print(validated_data)
@@ -230,7 +234,7 @@ class OrderSerializer(serializers.ModelSerializer):
         # print(orderitems)
         # [OrderedDict([('MenuItem', <MenuItem: Boba Black Milk Tea>), ('quantity', 3), ('Milk', <Milk: Soy Milk>)])]
         user = self.context['request'].user
-        order_obj = Order.objects.create(user=user, date=date.today())
+        order_obj = Order.objects.create(user=user, date=date.today(), tip=validated_data['tip'])
         
         for orderitem in orderitems:
             menuitem = orderitem.pop('MenuItem')

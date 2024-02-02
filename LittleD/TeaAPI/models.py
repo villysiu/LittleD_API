@@ -66,17 +66,16 @@ class Order(models.Model):
     user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
     order_status = models.CharField(max_length=1, choices=STATUS_CHOICES, default="R")
     
-    total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
-    # date = models.DateTiField(db_index=True, null=True, blank=True)
+    # total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
     date = models.DateField(db_index=True, null=True, blank=True)
-
+    tip = models.DecimalField(decimal_places=2, max_digits=5, default=0)
  
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, related_name='orderitems', on_delete=models.CASCADE)
     menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField(default=0)
-    unit_price = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
-    line_total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
+    # unit_price = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
+    # line_total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
 
     class Meta:
