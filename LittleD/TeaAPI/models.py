@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
-import datetime
-from django.core.exceptions import ValidationError
+
+# from django.core.exceptions import ValidationError
 
 class Category(models.Model):
     slug = models.SlugField()
@@ -21,8 +21,24 @@ class Milk(models.Model):
     # for serializers.StringRelatedField to display string
     def __str__(self)-> str:
         return self.title
+
+# class Temperature(models.Model):
+#     slug = models.SlugField()
+#     title = models.CharField(max_length=255, db_index=True)
+#     # price = models.DecimalField(
+#     #     max_digits=6, decimal_places=2, default=0, validators=[MinValueValidator(0)]
+#     # )
+#     # for serializers.StringRelatedField to display string
+#     def __str__(self)-> str:
+#         return self.title
     
 class MenuItem(models.Model):      
+    TEMP_CHOICES = {
+        "H":"Hot",
+        "I":"Iced",
+    }
+    
+    
     title = models.CharField(max_length=255, db_index=True)
     price = models.DecimalField(
         max_digits=6, decimal_places=2, default=0, validators=[MinValueValidator(0)]
@@ -35,7 +51,8 @@ class MenuItem(models.Model):
         validators=[MaxValueValidator(1000)], default=0
     )
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
-
+    temperature = models.CharField(max_length=1, choices=TEMP_CHOICES, default="I")
+    # temperature = models.ForeignKey(Temperature, on_delete=models.PROTECT, null=True, blank=True)
     def __str__(self):
         return self.title
 
@@ -54,7 +71,8 @@ class Cart(models.Model):
     quantity = models.PositiveSmallIntegerField(default=0)
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
 
-    
+    class Meta: 
+        unique_together = ('menuitem', 'milk', 'user')
 
     
 class Order(models.Model):

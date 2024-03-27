@@ -24,6 +24,7 @@ class Milks(generics.ListCreateAPIView):
     serializer_class = MilkSerializer
     # permission_classes = [CategoriesMenuItemsPermission]
 
+
 class SingleMilk(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Milk.objects.all()
     serializer_class = MilkSerializer
@@ -95,21 +96,22 @@ class Orders(generics.ListCreateAPIView):
         return queryset
     
     def create(self, request, *args, **kwargs):
-
-        current_user = self.request.user
-        user_cart_items = Cart.objects.filter(user=current_user)
-#         #<QuerySet [<Cart: Cart object (14)>, <Cart: Cart object (15)>]>
-        # print(user_cart_items)
+        
+    #     current_user = self.request.user
+        user_cart_items = Cart.objects.filter(user=self.request.user)
+        #<QuerySet [<Cart: Cart object (14)>, <Cart: Cart object (15)>]>
+       
         if len(user_cart_items) == 0:
             return Response({'message': 'Cart is empty.'}, 200)
 
         orderitems=[]
         for item in list(user_cart_items.values()):
             orderitems.append(item)
+
         print(orderitems)
         
         serialized_order = OrderSerializer(
-            data = {'orderitems': orderitems, 'tip': request.data['tip']}, 
+            data = { 'orderitems': orderitems, 'tip': request.data['tip'] },
             context = {'request': request}
         )
         
@@ -118,6 +120,7 @@ class Orders(generics.ListCreateAPIView):
             for user_cart_item in user_cart_items:
                 user_cart_item.delete()
             return Response(serialized_order.data, 201)
+
 
 
 class SingleOrder(generics.RetrieveUpdateDestroyAPIView):   
