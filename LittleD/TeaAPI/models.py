@@ -70,9 +70,9 @@ class Cart(models.Model):
     menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE, db_index=True)
     quantity = models.PositiveSmallIntegerField(default=0)
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
-
+    temperature = models.CharField(max_length=1, default='H')
     class Meta: 
-        unique_together = ('menuitem', 'milk', 'user')
+        unique_together = ('menuitem', 'milk', 'user','temperature')
 
     
 class Order(models.Model):

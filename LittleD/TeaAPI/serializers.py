@@ -23,11 +23,13 @@ class MenuItemSerializer(serializers.ModelSerializer):
         queryset=Milk.objects.all(), 
         write_only=True,
     )
-
+    temperature = serializers.CharField()
+    # temperature = serializers.CharField(source='get_temperature_display')
+    # order_status = serializers.CharField(source='get_order_status_display', read_only=True)
     class Meta:
         model = MenuItem
         fields = ['pk', 'title', 'price', 'description',
-                  'inventory', 'milk_id', 'milk_pk']
+                  'inventory', 'milk_id', 'milk_pk', 'temperature']
     
    
     # POST
@@ -40,11 +42,13 @@ class MenuItemSerializer(serializers.ModelSerializer):
     
     # #PATCH/ PUT
     def update(self, instance, validated_data):
+        print(validated_data)
         instance.title = validated_data.get('title', instance.title)
         instance.price = validated_data.get('price', instance.price)
         instance.description = validated_data.get('description', instance.description)
         instance.inventory = validated_data.get('inventory', instance.inventory)
         instance.milk = validated_data.get('Milk', instance.milk)
+        instance.temperature = validated_data.get('temperature', instance.temperature)
         instance.save()
         return instance
 
@@ -92,7 +96,7 @@ class CartSerializer(serializers.ModelSerializer):
         queryset=Milk.objects.all(), 
         write_only=True,
     )
-
+    temperature = serializers.CharField()
     unit_price = serializers.SerializerMethodField()
     linetotal = serializers.SerializerMethodField()
     tax = serializers.SerializerMethodField()
@@ -102,7 +106,7 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['pk','user_id', 
                   'menuitem_pk', 'menuitem_id', 
                   'quantity','linetotal', 'unit_price','tax',
-                    'milk_id', 'milk_pk']
+                    'milk_id', 'milk_pk', 'temperature']
 
     def get_unit_price(self, obj):
         return obj.menuitem.price + obj.milk.price
@@ -121,7 +125,8 @@ class CartSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         menuitem = validated_data.pop('MenuItem')
         milk = validated_data.pop('Milk')
-        cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user, milk=milk)
+        temperature = validated_data.pop('temperature')
+        cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user, milk=milk, temperature=temperature)
         if menuitem.inventory <= cartitem_obj.quantity:
             cartitem_obj.delete()
             raise serializers.ValidationError("Out of stock".format(menuitem.inventory))
@@ -181,7 +186,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
         fields = [ 
             'pk', 'menuitem_id', 'menuitem_pk',
             'quantity', 'unit_price', 'line_total',
-            # 'title',
             'milk_id', 'milk_pk'
             ]
         
