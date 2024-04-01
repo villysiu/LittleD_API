@@ -4,6 +4,7 @@ from datetime import date
 from django.db.models import Sum, ExpressionWrapper,F, DecimalField
 from decimal import *
 from django.db import IntegrityError
+
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -24,12 +25,13 @@ class MenuItemSerializer(serializers.ModelSerializer):
         write_only=True,
     )
     temperature = serializers.CharField()
+    sweetness = serializers.CharField()
     # temperature = serializers.CharField(source='get_temperature_display')
     # order_status = serializers.CharField(source='get_order_status_display', read_only=True)
     class Meta:
         model = MenuItem
         fields = ['pk', 'title', 'price', 'description',
-                  'inventory', 'milk_id', 'milk_pk', 'temperature']
+                  'inventory', 'milk_id', 'milk_pk', 'temperature', 'sweetness']
     
    
     # POST
@@ -49,6 +51,7 @@ class MenuItemSerializer(serializers.ModelSerializer):
         instance.inventory = validated_data.get('inventory', instance.inventory)
         instance.milk = validated_data.get('Milk', instance.milk)
         instance.temperature = validated_data.get('temperature', instance.temperature)
+        instance.sweetness = validated_data.get('sweetness', instance.sweetness)
         instance.save()
         return instance
 
@@ -97,6 +100,7 @@ class CartSerializer(serializers.ModelSerializer):
         write_only=True,
     )
     temperature = serializers.CharField()
+    sweetness = serializers.CharField()
     unit_price = serializers.SerializerMethodField()
     linetotal = serializers.SerializerMethodField()
     tax = serializers.SerializerMethodField()
@@ -106,7 +110,7 @@ class CartSerializer(serializers.ModelSerializer):
         fields = ['pk','user_id', 
                   'menuitem_pk', 'menuitem_id', 
                   'quantity','linetotal', 'unit_price','tax',
-                    'milk_id', 'milk_pk', 'temperature']
+                  'milk_id', 'milk_pk', 'temperature', 'sweetness']
 
     def get_unit_price(self, obj):
         return obj.menuitem.price + obj.milk.price
@@ -126,7 +130,8 @@ class CartSerializer(serializers.ModelSerializer):
         menuitem = validated_data.pop('MenuItem')
         milk = validated_data.pop('Milk')
         temperature = validated_data.pop('temperature')
-        cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user, milk=milk, temperature=temperature)
+        sweetness = validated_data.pop('sweetness')
+        cartitem_obj, created =Cart.objects.get_or_create(menuitem=menuitem, user=user, milk=milk, temperature=temperature, sweetness=sweetness)
         if menuitem.inventory <= cartitem_obj.quantity:
             cartitem_obj.delete()
             raise serializers.ValidationError("Out of stock".format(menuitem.inventory))
@@ -148,6 +153,7 @@ class CartSerializer(serializers.ModelSerializer):
             instance.quantity = validated_data.get('quantity', instance.quantity)  
             instance.milk = validated_data.get('Milk', instance.milk)
             instance.temperature = validated_data.get('temperature', instance.temperature)
+            instance.sweetness = validated_data.get('sweetness', instance.sweetness)
             instance.save()
             return instance
 
@@ -155,7 +161,8 @@ class CartSerializer(serializers.ModelSerializer):
             print("Item with same spec existed")
             milk = validated_data.get('Milk', instance.milk)
             temperature = validated_data.get('temperature', instance.temperature)
-            dup_cartitem =Cart.objects.get(menuitem=menuitem, user=user, milk=milk, temperature=temperature)
+            sweetness = validated_data.get('sweetness', instance.sweetness)
+            dup_cartitem =Cart.objects.get(menuitem=menuitem, user=user, milk=milk, temperature=temperature, sweetness=sweetness)
             
             dup_cartitem.quantity += instance.quantity
             dup_cartitem.save()

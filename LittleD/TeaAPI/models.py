@@ -38,7 +38,14 @@ class MenuItem(models.Model):
         "H":"Hot",
         "I":"Iced",
     }
-    
+    SWEETNESS_CHOICES = {
+        "N": "Not Changable",
+        "100":"100%",
+        "75":"75%",
+        "50":"50%",
+        "25":"25%",
+        "0":"0%"
+    }
     
     title = models.CharField(max_length=255, db_index=True)
     price = models.DecimalField(
@@ -53,6 +60,8 @@ class MenuItem(models.Model):
     )
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
     temperature = models.CharField(max_length=1, choices=TEMP_CHOICES, default="I")
+    sweetness = models.CharField(max_length=3, choices=SWEETNESS_CHOICES, default="100")
+    
     # temperature = models.ForeignKey(Temperature, on_delete=models.PROTECT, null=True, blank=True)
     def __str__(self):
         return self.title
@@ -72,8 +81,10 @@ class Cart(models.Model):
     quantity = models.PositiveSmallIntegerField(default=0)
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
     temperature = models.CharField(max_length=1, default='I')
+    sweetness = models.CharField(max_length=3, default='100')
+    
     class Meta: 
-        unique_together = ('menuitem', 'milk', 'user','temperature')
+        unique_together = ('menuitem', 'milk', 'user','temperature', 'sweetness')
 
     
 class Order(models.Model):
@@ -96,7 +107,8 @@ class OrderItem(models.Model):
     # unit_price = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
     # line_total = models.DecimalField(decimal_places=2, max_digits=5, default=0, editable=False)
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
-
+    temperature = models.CharField(max_length=1, default='I')
+    sweetness = models.CharField(max_length=3, default='100')
     class Meta:
-        unique_together = ('order', 'menuitem', 'milk')
+        unique_together = ('order', 'menuitem', 'milk', 'temperature', 'sweetness')
 
