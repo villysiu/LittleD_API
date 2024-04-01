@@ -34,6 +34,7 @@ class Milk(models.Model):
     
 class MenuItem(models.Model):      
     TEMP_CHOICES = {
+        "N": "Not Changable",
         "H":"Hot",
         "I":"Iced",
     }
@@ -70,7 +71,7 @@ class Cart(models.Model):
     menuitem = models.ForeignKey(MenuItem, on_delete=models.CASCADE, db_index=True)
     quantity = models.PositiveSmallIntegerField(default=0)
     milk = models.ForeignKey(Milk, on_delete=models.PROTECT, null=True, blank=True)
-    temperature = models.CharField(max_length=1, default='H')
+    temperature = models.CharField(max_length=1, default='I')
     class Meta: 
         unique_together = ('menuitem', 'milk', 'user','temperature')
 

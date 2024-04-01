@@ -147,13 +147,15 @@ class CartSerializer(serializers.ModelSerializer):
         try:
             instance.quantity = validated_data.get('quantity', instance.quantity)  
             instance.milk = validated_data.get('Milk', instance.milk)
+            instance.temperature = validated_data.get('temperature', instance.temperature)
             instance.save()
             return instance
 
         except IntegrityError as e:
             print("Item with same spec existed")
             milk = validated_data.get('Milk', instance.milk)
-            dup_cartitem =Cart.objects.get(menuitem=menuitem, user=user, milk=milk)
+            temperature = validated_data.get('temperature', instance.temperature)
+            dup_cartitem =Cart.objects.get(menuitem=menuitem, user=user, milk=milk, temperature=temperature)
             
             dup_cartitem.quantity += instance.quantity
             dup_cartitem.save()
