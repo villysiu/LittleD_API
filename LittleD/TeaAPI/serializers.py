@@ -185,17 +185,20 @@ class OrderItemSerializer(serializers.ModelSerializer):
         queryset=Milk.objects.all(), 
         write_only=True,
     )
+    temperature = serializers.CharField()
+    sweetness = serializers.CharField()
     unit_price = serializers.SerializerMethodField(read_only=True)
     line_total = serializers.SerializerMethodField(read_only=True)
     # title = serializers.SerializerMethodField(read_only=True)
-
+    # unit_price = serializers.FloatField()
+    # line_total = serializers.FloatField()
 
     class Meta:
         model = OrderItem
         fields = [ 
             'pk', 'menuitem_id', 'menuitem_pk',
             'quantity', 'unit_price', 'line_total',
-            'milk_id', 'milk_pk'
+            'milk_id', 'milk_pk', 'temperature', 'sweetness'
             ]
         
     def get_unit_price(self, obj):

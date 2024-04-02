@@ -106,7 +106,17 @@ class Orders(generics.ListCreateAPIView):
 
         orderitems=[]
         for item in list(user_cart_items.values()):
-            orderitems.append(item)
+            print(item)
+            dict = {
+                'menuitem_pk': item['menuitem_id'],
+                'quantity': item['quantity'],
+                'milk_pk':item['milk_id'],
+                'temperature': item['temperature'],
+                'sweetness': item['sweetness'],
+                # 'unit_price': item['unit_price'],
+                # 'line_total': item['line_total'],
+            }
+            orderitems.append(dict)
 
         print(orderitems)
         
