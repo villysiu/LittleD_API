@@ -1,23 +1,11 @@
 Python: Select Interpreter' is 3.10
 
 # macOS
-python3 -m venv .venv
-source .venv/bin/activate
+API % pipenv shell
+(.venv) API % cd LittleD
+(.venv) LittleD % python3 manage.py runserver
 
-In VS Code, open the Command Palette (View > Command Palette or (⇧⌘P)). Then select the Python: Select Interpreter command:
-Python: Select Interpreter' 3:10
-In venv, 
-
-(.venv) villysiu@Villys-MacBook-Pro LittleD % python manage.py runserver 
-pip3 install djangorestframework
-pip3 install mysqlclient   
-pip3 install djoser  
-pip3 install django-filter 
-pip3 install django-cors-he
-
-pip3 install mysqlclient
-
-python3 manage.py runserver        
+      
 
 
 python3 manage.py createsuperuser
