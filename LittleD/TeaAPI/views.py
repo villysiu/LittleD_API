@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from .models import MenuItem, Category, Cart, Order, OrderItem, Milk, MenuitemCategory
-from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, OrderItemSerializer, MilkSerializer, MenuitemCategorySerializer
-from .permissions import CategoriesMenuItemsPermission, CategoryMenuItemPermission, CartItemsPermission, CartItemsPermission, SingleCartItemPermission, OrdersPermission, SingleOrderPermission, SingleOrderItemPermission
+from .models import MenuItem, Category, Cart, Order, OrderItem, Milk
+from .serializers import CategorySerializer, MenuItemSerializer, CartSerializer, OrderSerializer, OrderItemSerializer, MilkSerializer
+from .permissions import CartItemsPermission, CartItemsPermission, SingleCartItemPermission, OrdersPermission, SingleOrderPermission, SingleOrderItemPermission, MenuItemPermission, MenuItemsPermission
 # , OrdersPermission
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -12,29 +12,29 @@ from rest_framework.decorators import api_view, permission_classes
 class Categories(generics.ListCreateAPIView):   
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes = [CategoriesMenuItemsPermission]
+    permission_classes = [MenuItemsPermission]
 
 class SingleCategory(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [CategoryMenuItemPermission]
+    permission_classes = [MenuItemPermission]
 
 class Milks(generics.ListCreateAPIView):   
     queryset = Milk.objects.all()
     serializer_class = MilkSerializer
-    # permission_classes = [CategoriesMenuItemsPermission]
+    permission_classes = [MenuItemsPermission]
 
 
 class SingleMilk(generics.RetrieveUpdateDestroyAPIView):   
     queryset = Milk.objects.all()
     serializer_class = MilkSerializer
-    permission_classes = [CategoryMenuItemPermission]
+    permission_classes = [MenuItemPermission]
 
 class MenuItems(generics.ListCreateAPIView):   
     queryset = MenuItem.objects.all()
     # throttle_classes = [AnonRateThrottle, UserRateThrottle]
     serializer_class = MenuItemSerializer
-    permission_classes = [CategoriesMenuItemsPermission]
+    permission_classes = [MenuItemsPermission]
     
     # pagination_class = CustomPagination
     ordering_fields=['price']
@@ -44,18 +44,18 @@ class MenuItems(generics.ListCreateAPIView):
 class SingleMenuItem(generics.RetrieveUpdateDestroyAPIView):   
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializer
-    permission_classes = [CategoryMenuItemPermission]
+    permission_classes = [MenuItemPermission]
 
 
-class MenuitemCategories(generics.ListCreateAPIView):
-    queryset = MenuitemCategory.objects.all()
-    serializer_class = MenuitemCategorySerializer
-    filterset_fields = ['category_id', 'menuitem_id']
+# class MenuitemCategories(generics.ListCreateAPIView):
+#     queryset = MenuitemCategory.objects.all()
+#     serializer_class = MenuitemCategorySerializer
+#     filterset_fields = ['category_id', 'menuitem_id']
     
-class SingleMenuitemCategory(generics.RetrieveUpdateDestroyAPIView):  
-    queryset = MenuitemCategory.objects.all()
-    serializer_class = MenuitemCategorySerializer
-    permission_classes = [CategoryMenuItemPermission]
+# class SingleMenuitemCategory(generics.RetrieveUpdateDestroyAPIView):  
+#     queryset = MenuitemCategory.objects.all()
+#     serializer_class = MenuitemCategorySerializer
+#     permission_classes = [CategoryMenuItemPermission]
 
 class CartItmes(generics.ListCreateAPIView, generics.DestroyAPIView):
 

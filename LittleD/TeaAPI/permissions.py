@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-class CategoriesMenuItemsPermission(permissions.BasePermission):
+class MenuItemsPermission(permissions.BasePermission):
     """
     Custom permission to only allow owners of an object to edit it.
     """
@@ -11,7 +11,7 @@ class CategoriesMenuItemsPermission(permissions.BasePermission):
             return True
     
 
-class CategoryMenuItemPermission(permissions.BasePermission):
+class MenuItemPermission(permissions.BasePermission):
     """
     Custom permission to only allow owners of an object to edit it.
     """

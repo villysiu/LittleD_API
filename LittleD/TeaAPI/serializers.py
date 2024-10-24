@@ -1,5 +1,5 @@
 from rest_framework import serializers 
-from .models import Category, MenuItem, Cart, OrderItem, Order, Milk, MenuitemCategory
+from .models import Category, MenuItem, Cart, OrderItem, Order, Milk
 from datetime import date
 from django.db.models import Sum, ExpressionWrapper,F, DecimalField
 from decimal import *
@@ -9,7 +9,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ['pk','title', 'slug']
+        fields = ['pk','title', 'slug', 'desc', 'image_path']
 
 class MilkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,14 +24,20 @@ class MenuItemSerializer(serializers.ModelSerializer):
         queryset=Milk.objects.all(), 
         write_only=True,
     )
+    category_pk = serializers.PrimaryKeyRelatedField(
+        source='Category',
+        queryset=Category.objects.all(), 
+        write_only=True,
+    )
     temperature = serializers.CharField()
     sweetness = serializers.CharField()
+    
     # temperature = serializers.CharField(source='get_temperature_display')
     # order_status = serializers.CharField(source='get_order_status_display', read_only=True)
     class Meta:
         model = MenuItem
         fields = ['pk', 'title', 'price', 'description',
-                  'inventory', 'milk_id', 'milk_pk', 'temperature', 'sweetness']
+                  'inventory', 'milk_id', 'milk_pk', 'category_id', 'category_pk','temperature', 'sweetness']
     
    
     # POST
@@ -39,7 +45,8 @@ class MenuItemSerializer(serializers.ModelSerializer):
         print("in serializer")
         print(validated_data)
         milk_obj = validated_data.pop('Milk')
-        menuitem_obj = MenuItem.objects.create( milk=milk_obj, **validated_data)
+        category_obj = validated_data.pop('Category')
+        menuitem_obj = MenuItem.objects.create( milk=milk_obj,category=category_obj, **validated_data)
         return menuitem_obj
     
     # #PATCH/ PUT
@@ -50,41 +57,42 @@ class MenuItemSerializer(serializers.ModelSerializer):
         instance.description = validated_data.get('description', instance.description)
         instance.inventory = validated_data.get('inventory', instance.inventory)
         instance.milk = validated_data.get('Milk', instance.milk)
+        instance.category = validated_data.get('Category', instance.category)
         instance.temperature = validated_data.get('temperature', instance.temperature)
         instance.sweetness = validated_data.get('sweetness', instance.sweetness)
         instance.save()
         return instance
 
-class MenuitemCategorySerializer(serializers.ModelSerializer):
-    menuitem_pk = serializers.PrimaryKeyRelatedField(
-        source='MenuItem',
-        queryset=MenuItem.objects.all(), 
-        write_only=True,
-    )
-    category_pk = serializers.PrimaryKeyRelatedField(
-        source='Category',
-        queryset=Category.objects.all(), 
-        write_only=True,
-    )
-    menuitem = MenuItemSerializer(read_only=True)
-    class Meta:
-        model = MenuitemCategory
-        fields = [ "pk","menuitem_pk", "category_pk", 'category_id', 'menuitem_id', 'menuitem']
+# class MenuitemCategorySerializer(serializers.ModelSerializer):
+#     menuitem_pk = serializers.PrimaryKeyRelatedField(
+#         source='MenuItem',
+#         queryset=MenuItem.objects.all(), 
+#         write_only=True,
+#     )
+#     category_pk = serializers.PrimaryKeyRelatedField(
+#         source='Category',
+#         queryset=Category.objects.all(), 
+#         write_only=True,
+#     )
+#     menuitem = MenuItemSerializer(read_only=True)
+#     class Meta:
+#         model = MenuitemCategory
+#         fields = [ "pk","menuitem_pk", "category_pk", 'category_id', 'menuitem_id', 'menuitem']
 
-    def create(self, validated_data): 
-        print(validated_data)
-        menuitem = validated_data.pop('MenuItem')
-        category = validated_data.pop('Category')
-        menuitem_category_obj = MenuitemCategory.objects.create(menuitem=menuitem, category=category)
+#     def create(self, validated_data): 
+#         print(validated_data)
+#         menuitem = validated_data.pop('MenuItem')
+#         category = validated_data.pop('Category')
+#         menuitem_category_obj = MenuitemCategory.objects.create(menuitem=menuitem, category=category)
         
-        menuitem_category_obj.save()
-        return menuitem_category_obj
+#         menuitem_category_obj.save()
+#         return menuitem_category_obj
 
-    def update(self, instance, validated_data):
-        instance.menuitem = validated_data.get('MenuItem', instance.menuitem)
-        instance.category = validated_data.get('Category', instance.category)
-        instance.save()
-        return instance
+#     def update(self, instance, validated_data):
+#         instance.menuitem = validated_data.get('MenuItem', instance.menuitem)
+#         instance.category = validated_data.get('Category', instance.category)
+#         instance.save()
+#         return instance
 
     
 class CartSerializer(serializers.ModelSerializer):

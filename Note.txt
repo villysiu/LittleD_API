@@ -5,7 +5,10 @@ API % pipenv shell
 (.venv) API % cd LittleD
 (.venv) LittleD % python3 manage.py runserver
 
-      
+    
+After changes in model, migrate it with
+python3 manage.py makemigrations
+python3 manage.py migrate
 
 
 python3 manage.py createsuperuser
