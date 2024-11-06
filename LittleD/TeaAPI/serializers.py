@@ -29,14 +29,14 @@ class MenuItemSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all(), 
         write_only=True,
     )
-    temperature = serializers.CharField()
+    # temperature = serializers.CharField()
     sweetness = serializers.CharField()
     
-    # temperature = serializers.CharField(source='get_temperature_display')
-    # order_status = serializers.CharField(source='get_order_status_display', read_only=True)
+    temperature = serializers.CharField(source='get_temperature_display')
+
     class Meta:
         model = MenuItem
-        fields = ['pk', 'title', 'price', 'description',
+        fields = ['pk', 'title', 'price', 'description', 'image_path',
                   'inventory', 'milk_id', 'milk_pk', 'category_id', 'category_pk','temperature', 'sweetness']
     
    
